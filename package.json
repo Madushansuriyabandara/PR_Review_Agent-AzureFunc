@@ -1,0 +1,32 @@
+{
+  "name": "azure-function-pr-review",
+  "version": "1.0.0",
+  "description": "Azure Function for PR review with AI suggestions",
+  "main": "PRReviewFunction/index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "azure",
+    "function",
+    "devops",
+    "ai",
+    "pr",
+    "review"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "@azure/functions": "^3.5.1",
+    "@langchain/community": "^0.3.39",
+    "@langchain/core": "^0.2.21",
+    "@langchain/google-genai": "^0.0.7",
+    "@langchain/openai": "^0.0.14",
+    "azure-devops-node-api": "^12.0.0",
+    "dotenv": "^16.3.1",
+    "langchain": "^0.3.19",
+    "cheerio": "^1.0.0"
+  }
+}
