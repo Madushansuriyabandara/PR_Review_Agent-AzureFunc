@@ -84,6 +84,17 @@ module.exports = async function (context, req) {
             return;
         }
 
+        const prTitle = resource.title || '';
+        if (prTitle.toLowerCase().startsWith('ai:') || 
+            prTitle.includes('[AI Suggested Fixes]')) {
+            context.log(`Skipping AI-generated PR: ${prTitle}`);
+            context.res = {
+                status: 200,
+                body: "Skipped AI-generated PR"
+            };
+            return;
+        }
+
         const repository = resource?.repository;
         const remoteUrl = repository.remoteUrl;
         let orgFromUrl;
