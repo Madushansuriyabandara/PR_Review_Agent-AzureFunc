@@ -550,6 +550,11 @@ async function generateComments(oldContent, newContent, filePath, guidelines, mo
     const numberedNew = numberLines(newContent);
     const newLines = splitLines(newContent);
 
+    // Add timeout handling
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('AI model request timed out after 25 seconds')), 25000);
+    });
+
     console.log(`Old file has ${oldLines.length} lines, new file has ${newLines.length} lines`);
 
         // Find and log a few differences to help debug
@@ -618,11 +623,19 @@ async function generateComments(oldContent, newContent, filePath, guidelines, mo
         console.log(`Old content sample: ${numberedOld.substring(0, 200)}...`);
         console.log(`New content sample: ${numberedNew.substring(0, 200)}...`);
         
-        const result = await chain.invoke({
-            guidelines,
-            numberedOld,
-            numberedNew
-        });
+        const result = await Promise.race([
+            chain.invoke({
+                guidelines,
+                numberedOld,
+                numberedNew
+            }),
+            timeoutPromise
+        ]);
+        // await chain.invoke({
+        //     guidelines,
+        //     numberedOld,
+        //     numberedNew
+        // });
         
         console.log(`AI model returned ${result.comments?.length || 0} comments for ${filePath}`);
         
@@ -647,10 +660,34 @@ async function generateComments(oldContent, newContent, filePath, guidelines, mo
             newContent: result.newContent
         };
     } catch (error) {
-        console.error(`AI analysis failed for ${filePath}:`, error);
-        // Log the full error details to help diagnose the issue
+        // console.error(`AI analysis failed for ${filePath}:`, error);
+        // // Log the full error details to help diagnose the issue
+        // console.error(`Error details: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`);
+        // return { comments: [], newContent: newContent 
+        let errorMessage = 'AI analysis failed';
+        
+        // Handle specific error types
+        if (error.message && error.message.includes('timed out')) {
+            errorMessage = 'AI model request timed out - the service may be experiencing high load';
+            console.error(`Timeout error for ${filePath}: The AI model request took too long to complete`);
+        } else if (error.code === 'ETIMEDOUT' || (error.cause && error.cause.code === 'ETIMEDOUT')) {
+            errorMessage = 'Network timeout connecting to AI service';
+            console.error(`Network timeout for ${filePath}: Could not connect to the AI service`);
+        } else if (error.code === 'ECONNREFUSED') {
+            errorMessage = 'Connection refused by AI service';
+            console.error(`Connection refused for ${filePath}: The AI service refused the connection`);
+        } else {
+            console.error(`AI analysis error for ${filePath}:`, error);
+        }
+        
+        // Log detailed error information for debugging
         console.error(`Error details: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`);
-        return { comments: [], newContent: newContent };
+        
+        // Return empty result but don't fail the entire function
+        return { 
+            comments: [], 
+            newContent: newContent,
+            error: errorMessage};
     }
 }
 
