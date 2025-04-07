@@ -118,6 +118,7 @@ module.exports = async function (context, req) {
             AZURE_OPENAI_API_DEPLOYMENT_NAME: process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME,
             AZURE_OPENAI_API_VERSION: process.env.AZURE_OPENAI_API_VERSION || "2023-12-01-preview",
             INSTRUCTION_SOURCE: process.env.INSTRUCTION_SOURCE,
+            MODEL_TYPE: process.env.MODEL_TYPE,
             CREATE_NEW_PR: process.env.CREATE_NEW_PR ? 
                 process.env.CREATE_NEW_PR.toLowerCase() === 'true' : false
         };
@@ -183,30 +184,45 @@ module.exports = async function (context, req) {
  * @returns {Object} - Initialized AI model
  */
 function initializeAIModel(config) {
-    if (config.AZURE_OPENAI_API_KEY) {
-        return new AzureChatOpenAI({
-            azureOpenAIApiKey: config.AZURE_OPENAI_API_KEY,
-            azureOpenAIApiInstanceName: config.AZURE_OPENAI_API_INSTANCE_NAME,
-            azureOpenAIApiDeploymentName: config.AZURE_OPENAI_API_DEPLOYMENT_NAME,
-            azureOpenAIApiVersion: config.AZURE_OPENAI_API_VERSION,
-            modelName: "gpt-4",
-            temperature: 0.7,
-            maxTokens: 4096,
-        });
-    } else if (config.OPENAI_API_KEY) {
-        return new ChatOpenAI({
-            openAIApiKey: config.OPENAI_API_KEY,
-            modelName: "gpt-4",
-            temperature: 0.7,
-            maxTokens: 4096,
-        });
-    } else if (config.GEMINI_API_KEY) {
-        return new ChatGoogleGenerativeAI({
-            modelName: "gemini-1.5-pro",
-            apiKey: config.GEMINI_API_KEY
-        });
-    } else {
-        throw new Error("No AI model API key provided");
+    const modelType = config.MODEL_TYPE.toLowerCase();
+    
+    switch (modelType) {
+        case 'azure':
+            if (!config.AZURE_OPENAI_API_KEY) {
+                throw new Error("MODEL_TYPE is set to 'azure' but AZURE_OPENAI_API_KEY is missing");
+            }
+            return new AzureChatOpenAI({
+                azureOpenAIApiKey: config.AZURE_OPENAI_API_KEY,
+                azureOpenAIApiInstanceName: config.AZURE_OPENAI_API_INSTANCE_NAME,
+                azureOpenAIApiDeploymentName: config.AZURE_OPENAI_API_DEPLOYMENT_NAME,
+                azureOpenAIApiVersion: config.AZURE_OPENAI_API_VERSION,
+                modelName: "gpt-4",
+                temperature: 0.7,
+                maxTokens: 4096,
+            });
+
+        case 'openai':
+            if (!config.OPENAI_API_KEY) {
+                throw new Error("MODEL_TYPE is set to 'openai' but OPENAI_API_KEY is missing");
+            }
+            return new ChatOpenAI({
+                openAIApiKey: config.OPENAI_API_KEY,
+                modelName: "gpt-4",
+                temperature: 0.7,
+                maxTokens: 4096,
+            });
+
+        case 'gemini':
+            if (!config.GEMINI_API_KEY) {
+                throw new Error("MODEL_TYPE is set to 'gemini' but GEMINI_API_KEY is missing");
+            }
+            return new ChatGoogleGenerativeAI({
+                modelName: "gemini-1.5-pro",
+                apiKey: config.GEMINI_API_KEY
+            });       
+
+        default:
+            throw new Error(`Invalid MODEL_TYPE: ${config.MODEL_TYPE}. Valid values: azure, openai, gemini, auto`);
     }
 }
 
