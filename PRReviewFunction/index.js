@@ -38,7 +38,7 @@ require('dotenv/config');
  * @param {Object} req - HTTP request
  */
 module.exports = async function (context, req) {
-    context.log('PR Review Function triggered by webhook');
+    context.log('PR Review Function triggered by webhook');   
     
     try {
         // Validate webhook payload
@@ -160,11 +160,11 @@ module.exports = async function (context, req) {
         }
         
         // Process the PR
-        await processPullRequest(context, config, guidelines);
+        const result = await processPullRequest(context, config, guidelines);
         
         context.res = {
             status: 200,
-            body: "PR review completed successfully"
+            body: result.message
         };
     } catch (error) {
         const errorMsg = `PR review failed: ${error.message || error}`;
@@ -211,10 +211,41 @@ function initializeAIModel(config) {
 }
 
 /**
+ * Check if AI comments already exist for this PR
+ * @param {Object} gitApi - Git API client
+ * @param {string} repoId - Repository ID
+ * @param {number} prId - PR ID
+ * @param {string} project - Project name
+ * @returns {Promise<boolean>} - Whether AI comments already exist
+ */
+async function hasExistingAIComments(gitApi, repoId, prId, project) {
+    try {
+        // Get all threads for the PR
+        const threads = await gitApi.getThreads(repoId, prId, project);
+        
+        // Check if any thread contains an AI comment
+        for (const thread of threads) {
+            for (const comment of thread.comments || []) {
+                if (comment.content && comment.content.includes('[AI Review]')) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('Error checking for existing AI comments:', error);
+        // If we can't check, assume no comments to be safe
+        return false;
+    }
+}
+
+/**
  * Process a pull request
  * @param {Object} context - Azure Function context
  * @param {Object} config - Configuration object
  * @param {string} guidelines - Review guidelines
+ * @returns {Promise<Object>} - Processing result
  */
 async function processPullRequest(context, config, guidelines) {
     // Initialize AI model
@@ -241,11 +272,18 @@ async function processPullRequest(context, config, guidelines) {
     // Check for draft PR
     if (targetPR.isDraft) {
         context.log("Skipping draft pull request");
-        return;
+        return { message: "Skipped draft pull request" };
     }
 
     if (!targetPR?.pullRequestId || !targetPR.sourceRefName || !targetPR.targetRefName) {
         throw new Error("PR not found or missing ref names");
+    }
+
+    //Check if AI comments already exist for this PR
+    const hasComments = await hasExistingAIComments(gitApi, repo.id, targetPR.pullRequestId, config.PROJECT);
+    if (hasComments) {
+        context.log("AI comments already exist for this PR, skipping");
+        return { message: "AI comments already exist for this PR, skipping" };
     }
 
     // 4. Get PR changes using iterations
@@ -260,43 +298,53 @@ async function processPullRequest(context, config, guidelines) {
         config.PROJECT
     );
 
-    
     // 5. Process each changed file
+    // Use Promise.all to process all files in parallel but wait for all to complete
+    const fileProcessingPromises = [];
+    
     for (const change of prChanges.changeEntries || []) {
         const itemPath = change.item?.path;
         if (!itemPath || change.item?.isFolder) continue;
 
-        // Get file content from both branches
-        const [oldContent, newContent] = await Promise.all([
-            getFileContent(gitApi, repo.id, itemPath, targetPR.targetRefName, config.PROJECT),
-            getFileContent(gitApi, repo.id, itemPath, targetPR.sourceRefName, config.PROJECT)
-        ]);
+        // Create a promise for processing this file
+        const filePromise = (async () => {
+            // Get file content from both branches
+            const [oldContent, newContent] = await Promise.all([
+                getFileContent(gitApi, repo.id, itemPath, targetPR.targetRefName, config.PROJECT),
+                getFileContent(gitApi, repo.id, itemPath, targetPR.sourceRefName, config.PROJECT)
+            ]);
 
-        // Generate AI comments
-        const analysis = await generateComments(oldContent, newContent, itemPath, guidelines, model);
+            // Generate AI comments
+            const analysis = await generateComments(oldContent, newContent, itemPath, guidelines, model);
+            
+            // Post comments to Azure DevOps
+            for (const comment of analysis.comments) {
+                await createCommentThread(
+                    gitApi,
+                    repo.id,
+                    targetPR.pullRequestId,
+                    comment.comment,
+                    itemPath,
+                    comment.lineNumber,
+                    config.PROJECT
+                );
+            }
+
+            // Update the correction collection
+            if (analysis.newContent !== newContent && validateCorrection(newContent, analysis.newContent)) {
+                corrections.push({
+                    path: itemPath,
+                    originalContent: newContent,
+                    correctedContent: analysis.newContent
+                });
+            }
+        })();
         
-        // Post comments to Azure DevOps
-        for (const comment of analysis.comments) {
-            await createCommentThread(
-                gitApi,
-                repo.id,
-                targetPR.pullRequestId,
-                comment.comment,
-                itemPath,
-                comment.lineNumber,
-                config.PROJECT
-            );
-        }
-
-        // Update the correction collection
-        if (analysis.newContent !== newContent && validateCorrection(newContent, analysis.newContent)) {
-            corrections.push({
-                path: itemPath,
-                originalContent: newContent,
-                correctedContent: analysis.newContent
-            });
-        }
+        fileProcessingPromises.push(filePromise);
     }
+    
+    // Wait for all file processing to complete
+    await Promise.all(fileProcessingPromises);
 
     // Create a new PR with corrections if enabled
     if (corrections.length > 0) {
@@ -308,12 +356,12 @@ async function processPullRequest(context, config, guidelines) {
                 corrections,
                 config.PROJECT
             );
-            context.log("Created new PR with AI-suggested changes");
+            context.log("Created new PR with AI-suggested changes");            
         } else {
-            context.log("AI-suggested changes available. To apply these changes, set CREATE_NEW_PR=true");
+            context.log("AI-suggested changes available. To apply these changes, set CREATE_NEW_PR=true");            
         }
     } else {
-        context.log("No AI-suggested changes to apply.");
+        context.log("No AI-suggested changes to apply.");        
     }
 }
 
@@ -430,7 +478,7 @@ async function generateComments(oldContent, newContent, filePath, guidelines, mo
 
     // Add timeout handling
     const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('AI model request timed out after 25 seconds')), 25000);
+        setTimeout(() => reject(new Error('AI model request timed out after 240 seconds')), 240000);
     });
 
     
