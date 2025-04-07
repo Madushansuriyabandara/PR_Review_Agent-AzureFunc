@@ -161,12 +161,8 @@ module.exports = async function (context, req) {
         }
         
         // Process the PR
-        const result = await processPullRequest(context, config, guidelines);
+        const result = await processPullRequest(context, config, guidelines);        
         
-        context.res = {
-            status: 200,
-            body: result.message
-        };
     } catch (error) {
         const errorMsg = `PR review failed: ${error.message || error}`;
         context.log.error(errorMsg);
