@@ -2,6 +2,12 @@
 
 This Azure Function integrates with Azure DevOps to provide AI-powered code reviews for pull requests. When triggered by a webhook from Azure DevOps, it analyzes the PR changes, adds AI-generated comments, and optionally creates a new PR with suggested improvements.
 
+
+![image](https://github.com/user-attachments/assets/83068cbb-b33e-419b-a748-f18a16cc6230)
+
+
+
+
 ## Features
 
 - Triggers on Azure DevOps PR webhook events
