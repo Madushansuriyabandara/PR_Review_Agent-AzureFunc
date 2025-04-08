@@ -117,6 +117,13 @@ func azure functionapp publish <YOUR_FUNCTION_APP_NAME>
 </tr>
 </table>
 
+**If you want to deploy a different model in Azure,**
+- Go to `AI Foundry`
+- Create an `Azure AI Hub`(Keep in mind that you have to make sure the region you are selecting is supporting the model that you are going to deploy. E.g.:As of February 2025, the DeepSeek R1 model is available in East US, East US 2, West US, West US 3, South Central US, and North Central US regions only)
+- Go to the resource and launch `Azure AI Foundry`
+- Create a project
+- Deploy the model you want 
+
 
 ### 4. Configure Application Settings ⚙️
 
