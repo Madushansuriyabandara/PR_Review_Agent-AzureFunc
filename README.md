@@ -181,4 +181,40 @@ You can configure multiple API keys in your environment variables and switch bet
 - 🚀 Choose the model that performs best for your specific codebase
 - 🔒 Have fallback options if one service is unavailable
 
+**Below shown is a AI Models Comparison Table as of April 2025**
+| Model Type/Provider | Model Name | Parameter Size | Context Length | Input Cost (per 1M tokens) | Output Cost (per 1M tokens) | Best For | Additional Features |
+|---------------------|------------|----------------|----------------|----------------------------|------------------------------|----------|---------------------|
+| **Google Gemini** | Gemini 2.5 Pro | Not specified | Not specified | $1.25 (≤200k tokens)<br>$2.50 (>200k tokens) | $10.00 (≤200k tokens)<br>$15.00 (>200k tokens) | Coding and complex reasoning tasks, multipurpose applications | Free tier available with lower rate limits |
+| **Google Gemini** | Gemini 2.0 Flash | Not specified | Not specified | Not specified | Not specified | Faster, more cost-effective option for simpler tasks | Not specified |
+| **OpenAI** | OpenAI o1 | Not specified | 200k | $15.00<br>$7.50 (cached) | $60.00 | Frontier reasoning tasks requiring tools, structured outputs, and vision | Supports vision capabilities |
+| **OpenAI** | OpenAI o3-mini | Not specified | 200k | $1.10<br>$0.55 (cached) | $4.40 | Coding, math, and science tasks with cost efficiency | Small cost-efficient reasoning model |
+| **OpenAI** | GPT-4.5 | Not specified | 128k | $75.00<br>$37.50 (cached) | $150.00 | Creative tasks and agentic planning | Largest GPT model |
+| **OpenAI** | GPT-4o | Not specified | 128k | $2.50<br>$1.25 (cached) | $10.00 | Complex tasks requiring high intelligence | Fine-tuning available |
+| **OpenAI** | GPT-4o mini | Not specified | 128k | $0.15<br>$0.075 (cached) | $0.60 | Fast, everyday tasks with affordability | Affordable small model |
+| **Azure OpenAI** | GPT-4.5-Preview | Not specified | 128k | $75.00<br>$37.50 (cached) | $150.00 | Creative tasks and agentic planning with deep world knowledge | Knowledge cutoff: October 2023 |
+| **Azure OpenAI** | o1 (2024-12-17) | Not specified | 200k | $15.00 (Global)<br>$16.50 (US/EU) | $60.00 (Global)<br>$66.00 (US/EU) | Complex reasoning tasks | Multiple deployment options |
+| **Azure OpenAI** | o3 mini (2025-01-31) | Not specified | 200k | $1.10 (Global)<br>$1.21 (US/EU) | $4.40 (Global)<br>$4.84 (US/EU) | Fast, cost-efficient reasoning for coding, math, and science | Batch API with 50% discount |
+| **DeepSeek** | DeepSeek-V3 (deepseek-chat) | 671B (37B active) | 64k | $0.27<br>$0.07 (cached) | $1.10 | General-purpose chat and text generation | Off-peak pricing (50% discount) |
+| **DeepSeek** | DeepSeek-R1 (deepseek-reasoner) | Not specified | 64k | $0.55<br>$0.14 (cached) | $2.19 | Complex reasoning tasks with Chain of Thought | 32k max CoT tokens, off-peak pricing (75% discount) |
+| **Anthropic/Claude** | Claude 3.7 Sonnet | ~500B | 200k | $3.00<br>$0.30 (cached read) | $15.00 | Visible step-by-step reasoning | 50% discount with batch processing |
+| **Anthropic/Claude** | Claude 3.5 Haiku | ~500B | 200k | $0.80<br>$0.08 (cached read) | $4.00 | Fastest, most cost-effective model | 50% discount with batch processing |
+| **Anthropic/Claude** | Claude 3 Opus | ~500B | 200k | $15.00<br>$1.50 (cached read) | $75.00 | Powerful model for complex tasks | 50% discount with batch processing |
+| **Anthropic/Claude** | Claude 3.5 Sonnet (Legacy) | ~500B | 200k | $3.00<br>$0.30 (cached read) | $15.00 | General-purpose model | 50% discount with batch processing |
+| **Groq** | Llama 4 Scout (17Bx16E) | 109B (16 experts, 17B active) | 10M (claimed) | $0.11 | $0.34 | Fast inference with moderate cost | 460 tokens/sec speed, multi-modal |
+| **Groq** | Llama 4 Maverick (17Bx128E) | 17B x 128 experts | Not specified | $0.50 | $0.77 | High-performance with larger context | Multi-modal capabilities |
+| **Groq** | DeepSeek R1 Distill Llama 70B | 70B | Not specified | $0.75 | $0.99 | Larger model for more complex tasks | 275 tokens/sec speed |
+| **Groq** | DeepSeek R1 Distill Qwen 32B | 32B | 128k | $0.69 | $0.69 | Balanced performance with extended context | 140 tokens/sec speed |
+| **Groq** | Qwen 2.5 32B Instruct | 32B | 128k | $0.79 | $0.79 | General purpose with extended context | 200 tokens/sec speed |
+| **Groq** | Qwen 2.5 Coder 32B Instruct | 32B | 128k | $0.79 | $0.79 | Coding tasks with fast inference | 390 tokens/sec speed |
+
+##### Notes:
+1. All prices are in USD and current as of April 2025
+2. "Cached" refers to cached input pricing, which is typically lower than standard input pricing
+3. Many providers offer batch processing with discounts (typically 25-50%)
+4. Context length refers to the maximum number of tokens the model can process in a single request
+5. Parameter sizes are not explicitly stated for many models, especially the newest ones
+6. Deployment options (global, regional) may affect pricing, especially for Azure OpenAI
+7. Some models offer time-based discounts (e.g., DeepSeek's off-peak pricing)
+8. Actual performance may vary based on specific use cases and implementation
+
 
