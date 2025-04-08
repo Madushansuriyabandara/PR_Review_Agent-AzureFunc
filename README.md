@@ -122,25 +122,24 @@ func azure functionapp publish <YOUR_FUNCTION_APP_NAME>
 
 In the Azure Portal, navigate to your Function App > Configuration and add the following application settings:
 
-| Setting Name | Description |
+| Environmental Variable Name | Description |
 |-------------|-------------|
 | AZURE_PAT | Personal Access Token for Azure DevOps with Code (Read & Write) permissions |
 | AZURE_PROJECT | Default Azure DevOps project name (optional if provided in webhook) |
 | AZURE_REPO | Default repository name (optional if provided in webhook) |
 | INSTRUCTION_SOURCE | Path or URL to review guidelines file |
 | CREATE_NEW_PR | Set to "true" to create new PRs with AI suggestions |
-| **MODEL_TYPE** | **AI model to use: "azure-openai", "openai", or "gemini"** |
+| **MODEL_TYPE** | **AI model to use: "azure", "openai", "gemini", "deepseek", "anthropic", or "groq"** |
 | GEMINI_API_KEY | Google Gemini API key (required if MODEL_TYPE is "gemini") |
 | OPENAI_API_KEY | OpenAI API key (required if MODEL_TYPE is "openai") |
-| AZURE_OPENAI_API_KEY | Azure OpenAI API key (required if MODEL_TYPE is "azure-openai") |
-| AZURE_OPENAI_API_INSTANCE_NAME | Azure OpenAI instance name (required if using Azure OpenAI) |
-| AZURE_OPENAI_API_DEPLOYMENT_NAME | Azure OpenAI deployment name (required if using Azure OpenAI) |
+| AZURE_OPENAI_API_KEY | Azure OpenAI API key (required if MODEL_TYPE is "azure") |
+| AZURE_OPENAI_API_INSTANCE_NAME | Azure OpenAI instance name (required if MODEL_TYPE is "azure") |
+| AZURE_OPENAI_API_DEPLOYMENT_NAME | Azure OpenAI deployment name (required if MODEL_TYPE is "azure") |
 | AZURE_OPENAI_API_VERSION | Azure OpenAI API version (defaults to "2023-12-01-preview") |
+| DEEPSEEK_API_KEY | DeepSeek API key (required if MODEL_TYPE is "deepseek" or "deepseek-r1") |
+| ANTHROPIC_API_KEY | Anthropic API key (required if MODEL_TYPE is "anthropic" or "claude") |
+| GROQ_API_KEY | Groq API key (required if MODEL_TYPE is "groq") |
 
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/6fd6e632-73d7-46fb-9328-c87d8cf90266" alt="Environment Variables Configuration" width="600">
-</div>
 
 ### 5. Configure Azure DevOps Webhook
 
